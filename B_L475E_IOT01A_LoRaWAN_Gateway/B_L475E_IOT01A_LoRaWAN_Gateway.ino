@@ -307,7 +307,7 @@ void sendNTPpacket(IPAddress& serverIP) {
 }
 
 void printWifiStatus() {
-  // print the SSID of the network you're attached to:
+  // print the SSID of the network you're connected to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
 
@@ -317,11 +317,11 @@ void printWifiStatus() {
   
   Serial.print("BSSID: ");
   for (uint8_t i = 0; i < 6; i++) {
-    if (bssid[5-i] < 0x10) {
+    if (bssid[i] < 0x10) {
       Serial.print("0");
     }
     
-    Serial.print(bssid[5-i], HEX);
+    Serial.print(bssid[i], HEX);
     
     if (i != 5) {
       Serial.print(":");
@@ -347,10 +347,10 @@ void printWifiStatus() {
 
   Serial.print("MAC Address: ");
   for (uint8_t i = 0; i < 6; i++) {
-    if (macAddr[5-i] < 0x10) {
+    if (macAddr[i] < 0x10) {
       Serial.print("0");
     }
-    Serial.print(macAddr[5-i], HEX);
+    Serial.print(macAddr[i], HEX);
 
     if (i != 5) {
       Serial.print(":");
@@ -361,14 +361,14 @@ void printWifiStatus() {
   }
 
   // build the Gateway ID and print it in the Serial Monitor
-  gwID[0] = macAddr[5];
-  gwID[1] = macAddr[4];
-  gwID[2] = macAddr[3];
+  gwID[0] = macAddr[0];
+  gwID[1] = macAddr[1];
+  gwID[2] = macAddr[2];
   gwID[3] = 0xFF;
   gwID[4] = 0xFE;
-  gwID[5] = macAddr[2];
-  gwID[6] = macAddr[1];
-  gwID[7] = macAddr[0];
+  gwID[5] = macAddr[3];
+  gwID[6] = macAddr[4];
+  gwID[7] = macAddr[5];
   
   Serial.print("LoRaWAN Gateway ID: ");
   for (uint8_t i = 0; i < 8; i++) {
