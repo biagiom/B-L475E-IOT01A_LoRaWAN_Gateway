@@ -84,8 +84,8 @@ int rstPin  = 9;
 sf_t sf = SF7;
 
 // Set center frequency
-uint32_t freq = 868100000;
-float frequency = 868.100;
+uint32_t freq = 867500000;
+float frequency = 867.500;
 uint8_t channel = 0;
 uint8_t rfChannel = 0;
 uint16_t bandWidth = 125;
@@ -289,17 +289,31 @@ void sendNTPpacket(IPAddress& serverIP) {
   packetBuffer[14]  = 49;
   packetBuffer[15]  = 52;
 
+  uint8_t retries = 3;
   // all NTP fields have been given values, now
   // you can send a packet requesting a timestamp:
   while(Udp.beginPacket(serverIP, 123) == 0) {  // NTP requests are to port 123
+    if (retries == 0) {
+      Serial.println("UDP Error: Restarting the Gateway...");
+      delay(1000);
+      HAL_NVIC_SystemReset();
+    }
     Serial.println("Failed to start UDP connection to NTP Server. Retrying in 2 seconds...");
     delay(2000);
+    retries--;
   }
-  
+
+  retries = 3;
   size_t pktSentLen;
   while((pktSentLen = Udp.write(packetBuffer, NTP_PACKET_SIZE)) == 0) {
+    if (retries == 0) {
+      Serial.println("UDP Error: Restarting the Gateway...");
+      delay(1000);
+      HAL_NVIC_SystemReset();
+    }
     Serial.println("Failed to send the UDP packet. Retrying in 3 seconds...");
     delay(3000);
+    retries--;
   }
   
   Serial.print("Length of the packet sent to NTP Server: ");
@@ -307,7 +321,7 @@ void sendNTPpacket(IPAddress& serverIP) {
 }
 
 void printWifiStatus() {
-  // print the SSID of the network you're connected to:
+  // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
 
@@ -476,7 +490,7 @@ void updateNTP() {
     epoch = secsSince1900 - seventyYears;
 
     #if SERIAL_DEBUG == 1
-    Serial.print("Seconds since Jan 1 1900 = ");
+    Serial.print("Seconds since Jan 1 1900: ");
     Serial.println(secsSince1900);
     // print Unix time:
     Serial.print("Unix time: ");
@@ -493,14 +507,29 @@ void updateNTP() {
 }
 
 void sendUdp(const char *msg, uint16_t len) {
+  uint8_t retries = 3;
   while(Udp.beginPacket(TTNServer.c_str(), PORT) != 1) {
+    if (retries == 0) {
+      Serial.println("UDP Error: Restarting the Gateway...");
+      delay(1000);
+      HAL_NVIC_SystemReset();
+    }
     Serial.println("Failed to start UDP connection to TTN. Retrying in 2 seconds...");
     delay(2000);
+    retries--;
   }
+  
+  retries = 3;
   size_t sentPktLen;
   while((sentPktLen = Udp.write((const uint8_t *)msg, len)) == 0) {
+    if (retries == 0) {
+      Serial.println("UDP Error: Restarting the Gateway...");
+      delay(1000);
+      HAL_NVIC_SystemReset();
+    }
     Serial.println("Failed to send the UDP packet. Retrying in 3 seconds...");
     delay(3000);
+    retries--;
   }
   delay(1000);
   Udp.stop();
